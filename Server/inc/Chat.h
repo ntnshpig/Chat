@@ -2,7 +2,7 @@
 #ifndef chat
 #define chat
 
-#define SERVERPORT 8111
+#define SERVERPORT 8696
 
 #include <stdio.h>
 #include <unistd.h>
@@ -29,7 +29,6 @@
 
 ///////database
 #include <sqlite3.h>
-int *client_anch, *client_ash;
 /////
 
 
@@ -44,21 +43,30 @@ char *mx_strcat(char *restrict s1, const char *restrict s2);
 char *mx_strjoin(char const *s1, char const *s2);
 char* int_to_str(int num);
 
+<<<<<<< HEAD
+////Database
+//extern sqlite3* db;
+=======
 /**Database**/
+>>>>>>> ashp
 sqlite3* db;
 void db_open(char* path, sqlite3** db);
 void db_exec(char* statement, sqlite3* db);
 
-//User Database
-void db_add_user(char *login, char *password, char *name);
+//User table
+void db_add_user(char *login, char *password);
 void db_del_user(char *login);
-void db_new_password(char *login, char *new_pass);
+void db_set_user_password(char *login, char *new_pass);
+void db_set_user_name(char *login, char *new_name);
+void db_set_user_login(char *login, char *new_login);
 char *db_get_user_password(char *login, sqlite3* db);
 int db_get_user_id(char *login, sqlite3* db);
+int db_get_count_user(sqlite3* db);
 
-//Online User database
+//Online User table
 void db_add_user_to_online(char *login, int socket, sqlite3* db);
 void db_del_user_from_online(char *login, sqlite3* db);
 int db_get_online_user_socket(char *login, sqlite3* db);
+int db_get_count_online_user(sqlite3* db);
 /**Database**/
 #endif
