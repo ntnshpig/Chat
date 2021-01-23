@@ -43,6 +43,8 @@ int mx_strlen(const char *s);
 char *mx_strcat(char *restrict s1, const char *restrict s2);
 char *mx_strjoin(char const *s1, char const *s2);
 char* int_to_str(int num);
+void mx_registration(int sock);
+char *clear_client_message(char *str);
 
 /**Database**/
 sqlite3* db;
@@ -80,6 +82,7 @@ void db_del_all_msg_from_chat(int chat_id);
 void db_add_member(int chat_id, int user_id);
 void db_del_member(int chat_id, int user_id);
 void db_del_all_member_for_chat(int chat_id);
+char** get_all_user_id_for_chat(int chat_id);
 
 /**Database**/
 #endif
