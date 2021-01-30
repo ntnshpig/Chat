@@ -38,7 +38,6 @@
 ///////database
 #include <sqlite3.h>
 
-GtkWidget *window;
 GtkWidget *activity_block;
 GtkWidget *sign_in_data[3];
 GtkWidget *left_box;
