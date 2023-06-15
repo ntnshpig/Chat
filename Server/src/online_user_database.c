@@ -1,6 +1,6 @@
 #include "Chat.h"
 
-void db_add_user_to_online(char *login, int socket, sqlite3* db){
+void db_add_user_to_online(char *login, int socket, sqlite3* db) {
     int user_id = db_get_user_id(login, db);
     char* statement = strdup("insert into online_users (online_user_id, socket) values (");
     statement = mx_strjoin(statement, int_to_str(user_id));
@@ -12,13 +12,24 @@ void db_add_user_to_online(char *login, int socket, sqlite3* db){
     free(statement);
 }
 
-void db_del_user_from_online(char *login, sqlite3* db){
+void db_del_user_from_online(char *login, sqlite3* db) {
     int user_id = db_get_user_id(login, db);
     char* statement = strdup("delete from online_users where online_user_id=");
     statement = mx_strjoin(statement, int_to_str(user_id));
     statement = mx_strjoin(statement, ";");
 
     db_exec(statement, db);
+
+    free(statement);
+}
+
+
+void db_del_all_users_from_online(char *login, sqlite3* db) {
+    if(login){}
+    char* statement = strdup("delete from online_users;");
+
+    db_exec(statement, db);
+
     free(statement);
 }
 
@@ -52,7 +63,7 @@ int db_get_count_online_user(sqlite3* db) {
     int count = -1;
     sqlite3_stmt *result;
 
-    char* statement = strdup("select count(*) from online_users");
+    char* statement = strdup("select count(*) from online_users;");
 
     int rc = sqlite3_prepare_v2(db, statement, -1, &result, 0);    
     if (rc != SQLITE_OK) {
@@ -62,8 +73,7 @@ int db_get_count_online_user(sqlite3* db) {
 
     rc = sqlite3_step(result);
     if (rc == SQLITE_ROW) {
-        char* tmp = strdup((char*)sqlite3_column_text(result, 0));
-        count = atoi(tmp);
+        count = sqlite3_column_int(result, 0);
     }
 
     sqlite3_finalize(result);

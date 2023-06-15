@@ -1,65 +1,61 @@
 #include "Chat.h"
 
-
-void mx_registration(int sock) {
+char *mx_registration(int sock) {
+    char *user_name;  
+	char *password1;
+    char *password2;
+	int read_size;
     char *client_message = clear_client_message(NULL);
-
-    int read_size;
-    write(sock, "Do you have an account?\nIf yes please input 'yes' else input 'no'", 
-    strlen("Do you have an account?\nIf yes please input 'yes' else input 'no'"));
-
-	if((read_size = recv(sock , client_message , 2000 , 0)) > 0){
-		if(strcmp(client_message, "no") == 0){
-
-            while(1) {
-                client_message = clear_client_message(client_message);
-
-                write(sock, "Pleas input unique login", 
-                strlen("Pleas input unique login"));
-
-                if((read_size = recv(sock , client_message , 2000 , 0)) > 0) {
-                    char *user_name = strdup(client_message);
-                    client_message = clear_client_message(client_message);
-
-                    
-                        if( db_get_user_password(user_name, db) == NULL ) {
-                            while(1) {
-                                write(sock, "Pleas input password", 
-                                strlen("Pleas input password"));
-                                char *pass1;
-                                char *pass2;
-
-                                if((read_size = recv(sock , client_message , 2000 , 0)) > 0) {
-                                    pass1 = strdup(client_message);
-                                    client_message = clear_client_message(client_message);
-                                }
-
-                                write(sock, "Pleas input the same password", 
-                                strlen("Pleas input the same password"));
-
-                                if((read_size = recv(sock , client_message , 2000 , 0)) > 0) {
-                                    pass2 = strdup(client_message);
-                                    client_message = clear_client_message(client_message);
-                                }
-
-                                if(strcmp(pass1, pass2) == 0) {
-                                    db_add_user(user_name, pass1);
-                                    free(pass1);
-                                    free(pass2);
-                                    return;
-                                }
-                                else {
-                                    free(pass1);
-                                    free(pass2);
-                                    write(sock, "Passwords not the same", 
-                                    strlen("Passwords not the same"));
-                                }
-                            }
-                        }
-                }
-                write(sock, "This login alredy exist\nTry again", 
-                strlen("This login already exist\nTry again"));
-            }
-		}
+    client_message = clear_client_message(client_message);
+    recv(sock , client_message , 2000 , 0);
+    if (strcmp(strdup(client_message), "Empty") == 0) {
+		send(sock, "Empty back", strlen("Empty back"), 0);
+		client_message = clear_client_message(client_message);
+		return NULL;
 	}
+    else if (strcmp(strdup(client_message), "Match") == 0) {
+        send(sock, "Match back", strlen("Match back"), 0);
+		client_message = clear_client_message(client_message);
+		return NULL;
+    }
+	else {
+        send(sock, "Nice back", strlen("Nice back"), 0);
+        client_message = clear_client_message(client_message);
+
+        if ((read_size = recv(sock , client_message , 2000 , 0) > 0) &&
+        (db_get_user_id(strdup(client_message), db)) == -1) {
+            user_name = strdup(client_message);
+            client_message = clear_client_message(client_message);
+            send(sock, "Name back", strlen("Name back"), 0);
+
+            if((read_size = recv(sock , client_message , 2000 , 0)) > 0) {
+                send(sock, "Pass1 back", strlen("Pass1 back"), 0);
+                password1 = strdup(client_message);
+                client_message = clear_client_message(client_message);
+            }
+            else {
+                send(sock, "Pass1 error back", strlen("Pass1 error back"), 0);
+                return NULL;
+            }
+
+            if((read_size = recv(sock , client_message , 2000 , 0)) > 0) {
+                send(sock, "@TRUE", strlen("@TRUE"), 0);
+                password2 = strdup(client_message);
+                client_message = clear_client_message(client_message);
+            }
+            else {
+                send(sock, "Pass2 error back", strlen("Pass2 error back"), 0);
+                return NULL;
+            }
+
+            db_add_user(user_name, password1);
+            db_add_user_to_online(user_name, sock, db);
+            return user_name;
+        }
+        else {
+            send(sock, "Name error back", strlen("Name error back"), 0);
+            return NULL;
+        }
+    }
+    return NULL;
 }
